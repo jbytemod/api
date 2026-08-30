@@ -147,10 +147,16 @@ The context and convenience methods are protected, while metadata accessors are 
 | `getApplicationVersion()` | Return the running JByteMod version. |
 | `getArchiveInfo()` | Return the current archive type, resource count, and source name or path. |
 | `getCurrentFile()` | Return the live `Map<String, ClassNode>` used by the editor. The keys are JVM internal class names such as `java/lang/String`. |
+| `getResourceNames()` | Return the sorted paths of all non-class entries in the current archive. |
+| `getResource(String)` | Return a defensive copy of a resource, or `null` when it does not exist. |
+| `putResource(String, byte[])` | Add or replace a non-class archive entry. |
+| `removeResource(String)` | Remove an archive entry and report whether it existed. |
 | `getClassBytes(ClassNode)` | Serialize an ASM class tree to class-file bytes. |
 | `readClass(byte[])` | Parse class-file bytes into a `ClassNode`. |
 
 `getCurrentFile()` returns an empty map when nothing is loaded. Its `ClassNode` values are the editor's live objects, so changes affect the in-memory archive.
+
+Resource paths use forward slashes and are normalized by JByteMod. Empty paths, absolute paths, traversal segments, and `.class` paths are rejected. Resource methods are intended for JAR and APK archives; attached-JVM and single-class views do not contain editable resources. Byte arrays returned from and passed to the API are copied.
 
 ### Bytecode changes
 

@@ -15,6 +15,14 @@ public interface PluginContext {
 
     Map<String, ClassNode> getCurrentFile();
 
+    List<String> getResourceNames();
+
+    byte[] getResource(String path);
+
+    void putResource(String path, byte[] bytes);
+
+    boolean removeResource(String path);
+
     byte[] getClassBytes(ClassNode classNode);
 
     ClassNode readClass(byte[] bytes);
