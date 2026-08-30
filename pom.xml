@@ -4,15 +4,24 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>brownie</groupId>
-        <artifactId>JByteMod-Remastered</artifactId>
-        <version>2.11.0</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
-
+    <groupId>brownie</groupId>
     <artifactId>jbytemod-api</artifactId>
+    <version>2.11.0</version>
     <name>JByteMod Plugin API</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>21</maven.compiler.release>
+        <asm.version>9.10-SNAPSHOT</asm.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>ow2</id>
+            <name>ASM snapshots</name>
+            <url>https://repository.ow2.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -21,4 +30,14 @@
             <version>${asm.version}</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+        </plugins>
+    </build>
 </project>
