@@ -45,6 +45,14 @@ public interface PluginContext {
 
     void terminateAttachedJvm() throws Exception;
 
+    JvmRuntimeInfo getAttachedJvmRuntimeInfo() throws Exception;
+
+    List<JvmThreadInfo> getAttachedJvmThreads(int maxStackDepth) throws Exception;
+
+    List<JvmClassLoaderInfo> getAttachedJvmClassLoaders() throws Exception;
+
+    Map<String, String> getAttachedJvmSystemProperties() throws Exception;
+
     String decompile(ClassNode classNode, MethodNode method, String decompilerId);
 
     void selectClass(ClassNode classNode);

@@ -211,8 +211,14 @@ The built-in IDs are `cfr`, `procyon`, `vineflower`, `jd-core`, `koffee`, and `a
 | `applyChangesToAttachedJvm()` | Redefine changed classes and return the number successfully sent to the target JVM. |
 | `setAttachedJvmFrozen(boolean)` | Suspend or resume the entire attached JVM process. |
 | `terminateAttachedJvm()` | Resume when necessary, terminate the target JVM, and keep its classes available as a local snapshot. |
+| `getAttachedJvmRuntimeInfo()` | Return VM identity, uptime, processor, memory, class-loading, and thread counters. |
+| `getAttachedJvmThreads(int)` | Return live threads and up to the requested number of stack frames per thread. Use `0` for no stacks. |
+| `getAttachedJvmClassLoaders()` | Return the live class-loader hierarchy and loaded-class counts. |
+| `getAttachedJvmSystemProperties()` | Return a snapshot of the target JVM's system properties. |
 
 The attachment operations throw `IllegalStateException` when no remote JVM is attached. Freezing pauses the target's UI, application threads, and agent connection, so resume it before refreshing or applying changes.
+
+Runtime inspection is served by JByteMod's injected agent and therefore inspects the same JVM and connection as the editor. The returned runtime, thread, loader, and property objects are snapshots and can be safely retained by a plugin.
 
 JVM HotSwap prohibits most structural changes, including adding or removing fields, methods, superclasses, or interfaces. Method-body and constant changes are normally supported.
 
