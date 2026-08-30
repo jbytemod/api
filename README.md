@@ -119,20 +119,142 @@ JByteMod discovers concrete `Plugin` subclasses directly from each JAR. No servi
 
 Return `true` from `isClickable()` to enable the plugin's menu entry.
 
-## Plugin context
+## Plugin class reference
 
-Call `getContext()` after `init()` begins to access JByteMod. The context provides:
+Call `getContext()` only after `init()` begins. JByteMod attaches the context before invoking that hook.
 
-- Application and archive information through `getApplicationVersion()` and `getArchiveInfo()`.
-- The active `Map<String, ClassNode>` and helpers for reading or writing class-file bytes.
-- Class replacement, method-modification notification, and tree refreshing.
-- All installed decompiler IDs and class or method decompilation.
-- Current class and method selection plus programmatic UI selection.
-- Opening and saving JAR, class, and APK files.
-- Listing JVM processes, attaching, refreshing classes, applying changes, freezing, resuming, and terminating the attached JVM.
-- JByteMod logging and access to the main menu bar and class tree for Swing integrations.
+| Method | Purpose |
+| --- | --- |
+| `getContext()` | Return the complete `PluginContext`. |
+| `getCurrentFile()` | Convenience wrapper for the active class map. |
+| `updateTree()` | Rebuild the class tree after changes. |
+| `getMenu()` | Return JByteMod's main `JMenuBar`. |
+| `getTree()` | Return the archive `JTree`. |
+| `getSelectedNode()` | Return the currently selected class, or `null`. |
+| `getSelectedMethod()` | Return the currently selected method, or `null`. |
+| `getName()` / `setName(...)` | Read or change the displayed plugin name. |
+| `getVersion()` / `setVersion(...)` | Read or change the displayed plugin version. |
+| `getAuthor()` / `setAuthor(...)` | Read or change the displayed author. |
 
-Changes made directly to a `MethodNode` should be followed by `getContext().methodModified(classNode, methodNode)`. Use `replaceClass(previous, replacement)` for whole-class replacement. JVM HotSwap still prohibits most structural changes, including adding or removing fields, methods, superclasses, or interfaces.
+The context and convenience methods are protected, while metadata accessors are public.
+
+## Complete context reference
+
+### Application and archive state
+
+| Method | Purpose |
+| --- | --- |
+| `getApplicationVersion()` | Return the running JByteMod version. |
+| `getArchiveInfo()` | Return the current archive type, resource count, and source name or path. |
+| `getCurrentFile()` | Return the live `Map<String, ClassNode>` used by the editor. The keys are JVM internal class names such as `java/lang/String`. |
+| `getClassBytes(ClassNode)` | Serialize an ASM class tree to class-file bytes. |
+| `readClass(byte[])` | Parse class-file bytes into a `ClassNode`. |
+
+`getCurrentFile()` returns an empty map when nothing is loaded. Its `ClassNode` values are the editor's live objects, so changes affect the in-memory archive.
+
+### Bytecode changes
+
+| Method | Purpose |
+| --- | --- |
+| `methodModified(ClassNode, MethodNode)` | Clear cached decompiler output and refresh the selected method or tree after changing a method. |
+| `replaceClass(ClassNode, ClassNode)` | Replace an entire class, including handling a changed class name and restoring the closest matching selection. |
+| `updateTree()` | Rebuild the visible archive tree after broader map changes. |
+
+After modifying instructions, try/catch blocks, local variables, annotations, or other method data directly, call `methodModified(...)`. Use `replaceClass(...)` when importing or generating a complete replacement class.
+
+```java
+ClassNode owner = getSelectedNode();
+MethodNode method = getSelectedMethod();
+method.instructions.insert(new org.objectweb.asm.tree.InsnNode(org.objectweb.asm.Opcodes.NOP));
+getContext().methodModified(owner, method);
+```
+
+Class-file round trips are also supported:
+
+```java
+byte[] bytes = getContext().getClassBytes(original);
+ClassNode replacement = getContext().readClass(bytes);
+getContext().replaceClass(original, replacement);
+```
+
+### Decompilation
+
+| Method | Purpose |
+| --- | --- |
+| `getDecompilerIds()` | Return every available decompiler ID. |
+| `decompile(ClassNode, MethodNode, String)` | Decompile a class or a specific method with the selected decompiler. Pass `null` as the method for the whole class. |
+
+The built-in IDs are `cfr`, `procyon`, `vineflower`, `jd-core`, `koffee`, and `asmifier`. Method-only output depends on the selected decompiler.
+
+### File operations
+
+| Method | Purpose |
+| --- | --- |
+| `openFile(String)` | Open a local `.jar`, `.class`, or `.apk` in the current JByteMod window and wait for loading to finish. |
+| `saveFile(String)` | Save the active archive or JVM class snapshot and return the final output path. |
+
+`saveFile(...)` creates missing parent directories and appends `.class` when a single loaded class is saved without that extension. Existing output files may be replaced.
+
+### JVM attachment and control
+
+| Method | Purpose |
+| --- | --- |
+| `listJvmProcesses()` | List attachable local JVMs except the current JByteMod process. |
+| `attachToJvm(String)` | Attach by PID, inject the agent, load runtime classes, and switch the current window to the remote archive. |
+| `refreshAttachedJvm()` | Reload classes from the target and discard unapplied in-memory edits. |
+| `applyChangesToAttachedJvm()` | Redefine changed classes and return the number successfully sent to the target JVM. |
+| `setAttachedJvmFrozen(boolean)` | Suspend or resume the entire attached JVM process. |
+| `terminateAttachedJvm()` | Resume when necessary, terminate the target JVM, and keep its classes available as a local snapshot. |
+
+The attachment operations throw `IllegalStateException` when no remote JVM is attached. Freezing pauses the target's UI, application threads, and agent connection, so resume it before refreshing or applying changes.
+
+JVM HotSwap prohibits most structural changes, including adding or removing fields, methods, superclasses, or interfaces. Method-body and constant changes are normally supported.
+
+### Selection and Swing integration
+
+| Method | Purpose |
+| --- | --- |
+| `getSelectedNode()` | Return the selected `ClassNode`, or `null`. |
+| `getSelectedMethod()` | Return the selected `MethodNode`, or `null`. |
+| `selectClass(ClassNode)` | Select and reveal a class in the JByteMod UI. |
+| `selectMethod(ClassNode, MethodNode)` | Select and reveal a method in the JByteMod UI. |
+| `getMenu()` | Return the main `JMenuBar` for window ownership or additional integration. |
+| `getTree()` | Return the archive `JTree`. |
+
+File, attachment, and selection methods marshal their JByteMod UI work onto Swing's event dispatch thread. Plugin callbacks should not assume they always run on that thread; use `SwingUtilities.invokeLater(...)` when directly changing Swing components.
+
+### Logging
+
+| Method | Purpose |
+| --- | --- |
+| `log(String)` | Write an informational message to the JByteMod log. |
+| `logError(String, Throwable)` | Write an error message and optionally print its exception. |
+
+## API data types
+
+### `ArchiveInfo`
+
+`ArchiveInfo` is a record containing:
+
+| Component | Meaning |
+| --- | --- |
+| `type()` | One of the `ArchiveType` values below. |
+| `resourceCount()` | Number of non-class output resources in the current archive. |
+| `source()` | Current file name, path, JVM label, or `null` when unavailable. |
+
+### `ArchiveType`
+
+| Value | Meaning |
+| --- | --- |
+| `NONE` | Nothing is loaded. |
+| `ARCHIVE` | A JAR or APK archive is loaded. |
+| `CLASS` | A single class file is loaded. |
+| `CURRENT_JVM` | Classes from JByteMod's own JVM are loaded. |
+| `REMOTE_JVM` | JByteMod is attached to another JVM. |
+
+### `JvmProcess`
+
+`JvmProcess` contains the process `pid()` and its JVM-provided `displayName()`. Pass the PID to `attachToJvm(...)`.
 
 ## Packaging and installation
 
