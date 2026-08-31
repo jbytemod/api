@@ -1,6 +1,6 @@
 # JByteMod Plugin API
 
-The public plugin API for [JByteMod Remastered](https://github.com/apkreader/JByteMod-Remastered). Plugins can inspect and modify the active ASM class tree, react to UI selections and archive loading, use JByteMod's decompilers, open and save files, and control an attached JVM.
+The public plugin API for [JByteMod Remastered](https://github.com/jbytemod/JByteMod-Remastered). Plugins can inspect and modify the active ASM class tree, react to UI selections and archive loading, use JByteMod's decompilers, open and save files, and control an attached JVM.
 
 JByteMod and plugins currently require JDK 21 or newer.
 
