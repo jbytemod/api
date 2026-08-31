@@ -215,10 +215,13 @@ The built-in IDs are `cfr`, `procyon`, `vineflower`, `jd-core`, `koffee`, and `a
 | `getAttachedJvmThreads(int)` | Return live threads and up to the requested number of stack frames per thread. Use `0` for no stacks. |
 | `getAttachedJvmClassLoaders()` | Return the live class-loader hierarchy and loaded-class counts. |
 | `getAttachedJvmSystemProperties()` | Return a snapshot of the target JVM's system properties. |
+| `invokeAttachedJvmAgentExtension(String, String, Map<String, byte[]>, byte[])` | Load or reuse a plugin-supplied agent extension in the target JVM and exchange opaque request/response bytes. |
 
 The attachment operations throw `IllegalStateException` when no remote JVM is attached. Freezing pauses the target's UI, application threads, and agent connection, so resume it before refreshing or applying changes.
 
 Runtime inspection is served by JByteMod's injected agent and therefore inspects the same JVM and connection as the editor. The returned runtime, thread, loader, and property objects are snapshots and can be safely retained by a plugin.
+
+Agent extensions keep feature-specific target code outside JByteMod core. The class-file map uses binary class names and must contain the entry class. That class must expose `public static byte[] invoke(byte[] request, Instrumentation instrumentation)`. Extension classes are cached by ID and content hash, must be self-contained apart from JDK classes, and run with the target JVM's permissions. Only invoke extensions supplied by trusted plugins.
 
 JVM HotSwap prohibits most structural changes, including adding or removing fields, methods, superclasses, or interfaces. Method-body and constant changes are normally supported.
 

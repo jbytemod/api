@@ -55,6 +55,9 @@ public interface PluginContext {
 
     Map<String, String> getAttachedJvmSystemProperties() throws Exception;
 
+    byte[] invokeAttachedJvmAgentExtension(String extensionId, String entryClassName,
+                                           Map<String, byte[]> classFiles, byte[] request) throws Exception;
+
     String decompile(ClassNode classNode, MethodNode method, String decompilerId);
 
     void selectClass(ClassNode classNode);
