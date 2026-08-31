@@ -43,6 +43,8 @@ public interface PluginContext {
 
     void setAttachedJvmFrozen(boolean frozen) throws Exception;
 
+    void detachFromAttachedJvm() throws Exception;
+
     void terminateAttachedJvm() throws Exception;
 
     JvmRuntimeInfo getAttachedJvmRuntimeInfo() throws Exception;
