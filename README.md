@@ -198,8 +198,9 @@ The built-in IDs are `cfr`, `procyon`, `vineflower`, `jd-core`, `koffee`, and `a
 | --- | --- |
 | `openFile(String)` | Open a local `.jar`, `.class`, or `.apk` in the current JByteMod window and wait for loading to finish. |
 | `saveFile(String)` | Save the active archive or JVM class snapshot and return the final output path. |
+| `saveFile(String, ApkSigningOptions)` | Save an APK with JByteMod's debug key or a caller-supplied JKS/PKCS#12 key. |
 
-`saveFile(...)` creates missing parent directories and appends `.class` when a single loaded class is saved without that extension. Existing output files may be replaced.
+`saveFile(...)` creates missing parent directories and appends the matching `.class`, `.jar`, or `.apk` extension when necessary. Existing output files may be replaced. Custom APK signing passwords remain in memory only for the save operation; callers should close `ApkSigningOptions` after use.
 
 ### JVM attachment and control
 
@@ -262,7 +263,8 @@ File, attachment, and selection methods marshal their JByteMod UI work onto Swin
 | Value | Meaning |
 | --- | --- |
 | `NONE` | Nothing is loaded. |
-| `ARCHIVE` | A JAR or APK archive is loaded. |
+| `ARCHIVE` | A JAR archive is loaded. |
+| `APK` | An Android APK archive is loaded. |
 | `CLASS` | A single class file is loaded. |
 | `CURRENT_JVM` | Classes from JByteMod's own JVM are loaded. |
 | `REMOTE_JVM` | JByteMod is attached to another JVM. |
