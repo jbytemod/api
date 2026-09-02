@@ -35,7 +35,8 @@ public interface PluginContext {
 
     default String saveFile(String path, ApkSigningOptions signingOptions) throws Exception {
         if (!signingOptions.usesDebugKey()) {
-            throw new UnsupportedOperationException("Custom APK signing is not supported by this JByteMod version");
+            throw new UnsupportedOperationException(
+                    "Custom Android archive signing is not supported by this JByteMod version");
         }
         return saveFile(path);
     }

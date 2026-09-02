@@ -110,7 +110,7 @@ JByteMod discovers concrete `Plugin` subclasses directly from each JAR. No servi
 | Hook | Called when |
 | --- | --- |
 | `init()` | The plugin has been attached to JByteMod and may use its context. |
-| `loadFile(...)` | An archive, class, APK, JVM snapshot, or attached JVM has finished loading. |
+| `loadFile(...)` | An archive, class, APK, Android App Bundle, JVM snapshot, or attached JVM has finished loading. |
 | `loadProgress(...)` | Loading progress changes. |
 | `classSelected(...)` | A class is selected in the tree. |
 | `methodSelected(...)` | A method is selected in the tree. |
@@ -156,7 +156,7 @@ The context and convenience methods are protected, while metadata accessors are 
 
 `getCurrentFile()` returns an empty map when nothing is loaded. Its `ClassNode` values are the editor's live objects, so changes affect the in-memory archive.
 
-Resource paths use forward slashes and are normalized by JByteMod. Empty paths, absolute paths, traversal segments, and `.class` paths are rejected. Resource methods are intended for JAR and APK archives; attached-JVM and single-class views do not contain editable resources. Byte arrays returned from and passed to the API are copied.
+Resource paths use forward slashes and are normalized by JByteMod. Empty paths, absolute paths, traversal segments, and `.class` paths are rejected. Resource methods are intended for JAR, APK, and Android App Bundle archives; attached-JVM and single-class views do not contain editable resources. Byte arrays returned from and passed to the API are copied.
 
 ### Bytecode changes
 
@@ -196,11 +196,11 @@ The built-in IDs are `cfr`, `procyon`, `vineflower`, `jd-core`, `koffee`, and `a
 
 | Method | Purpose |
 | --- | --- |
-| `openFile(String)` | Open a local `.jar`, `.class`, or `.apk` in the current JByteMod window and wait for loading to finish. |
+| `openFile(String)` | Open a local `.jar`, `.class`, `.apk`, or `.aab` in the current JByteMod window and wait for loading to finish. |
 | `saveFile(String)` | Save the active archive or JVM class snapshot and return the final output path. |
-| `saveFile(String, ApkSigningOptions)` | Save an APK with JByteMod's debug key or a caller-supplied JKS/PKCS#12 key. |
+| `saveFile(String, ApkSigningOptions)` | Save an APK or Android App Bundle with JByteMod's debug key or a caller-supplied JKS/PKCS#12 key. |
 
-`saveFile(...)` creates missing parent directories and appends the matching `.class`, `.jar`, or `.apk` extension when necessary. Existing output files may be replaced. Custom APK signing passwords remain in memory only for the save operation; callers should close `ApkSigningOptions` after use.
+`saveFile(...)` creates missing parent directories and appends the matching `.class`, `.jar`, `.apk`, or `.aab` extension when necessary. Existing output files may be replaced. Custom Android signing passwords remain in memory only for the save operation; callers should close `ApkSigningOptions` after use.
 
 ### JVM attachment and control
 
@@ -265,6 +265,7 @@ File, attachment, and selection methods marshal their JByteMod UI work onto Swin
 | `NONE` | Nothing is loaded. |
 | `ARCHIVE` | A JAR archive is loaded. |
 | `APK` | An Android APK archive is loaded. |
+| `AAB` | An Android App Bundle is loaded. |
 | `CLASS` | A single class file is loaded. |
 | `CURRENT_JVM` | Classes from JByteMod's own JVM are loaded. |
 | `REMOTE_JVM` | JByteMod is attached to another JVM. |
